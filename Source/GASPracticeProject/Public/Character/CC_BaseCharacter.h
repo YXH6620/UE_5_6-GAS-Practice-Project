@@ -7,6 +7,8 @@
 #include "GameFramework/Character.h"
 #include "CC_BaseCharacter.generated.h"
 
+class UGameplayAbility;
+
 UCLASS(Abstract)
 class GASPRACTICEPROJECT_API ACC_BaseCharacter : public ACharacter, public IAbilitySystemInterface
 {
@@ -16,4 +18,11 @@ public:
 	// Sets default values for this character's properties
 	ACC_BaseCharacter();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
+protected:
+	void GiveStartupAbilities();
+private:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Crash|Abilities")
+	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 };

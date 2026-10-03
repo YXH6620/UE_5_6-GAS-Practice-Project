@@ -6,4 +6,4 @@ namespace CCTags
 	{
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(Primary, "CCTags.CCAbilities.Primary", "Tag for the Primary Ability")
 	}
-}
+} 

@@ -4,6 +4,7 @@
 #include "GASPracticeProject/Public/Character/CC_BaseCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -16,9 +17,39 @@ ACC_BaseCharacter::ACC_BaseCharacter()
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 }
 
+void ACC_BaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ThisClass, bAlive);
+}
+
 UAbilitySystemComponent* ACC_BaseCharacter::GetAbilitySystemComponent() const
 {
 	return nullptr;
+}
+
+void ACC_BaseCharacter::HandleRespawn()
+{
+	bAlive = true;
+}
+
+void ACC_BaseCharacter::OnHealthChanged(const FOnAttributeChangeData& AttributeChangeData)
+{
+	if (AttributeChangeData.NewValue <= 0.f)
+	{
+		HandleDeath();
+	}
+}
+
+void ACC_BaseCharacter::HandleDeath()
+{
+	bAlive = false;
+
+	if (IsValid(GEngine))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, FString::Printf(TEXT("%s has died!"), *GetName()));
+	}
 }
 
 void ACC_BaseCharacter::GiveStartupAbilities()

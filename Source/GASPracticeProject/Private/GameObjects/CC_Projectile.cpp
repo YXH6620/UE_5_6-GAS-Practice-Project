@@ -9,6 +9,7 @@
 #include "Character/CC_PlayerCharacter.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "GameplayTags/CCTags.h"
+#include "Utils/CC_BlueprintLibrary.h"
 
 
 // Sets default values
@@ -27,16 +28,16 @@ void ACC_Projectile::NotifyActorBeginOverlap(AActor* OtherActor)
 	Super::NotifyActorBeginOverlap(OtherActor);
 	
 	ACC_PlayerCharacter* PlayerCharacter = Cast<ACC_PlayerCharacter>(OtherActor);
-	if (!IsValid(PlayerCharacter) && !PlayerCharacter->IsAlive()) return;
+	if (!IsValid(PlayerCharacter)) return;
+	if (!PlayerCharacter->IsAlive()) return;
 	UAbilitySystemComponent* AbilitySystemComponent = PlayerCharacter->GetAbilitySystemComponent();
 	if (!IsValid(AbilitySystemComponent) || !HasAuthority()) return;
 
-	FGameplayEffectContextHandle ContextHandle =  AbilitySystemComponent->MakeEffectContext();
-	FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(DamageEffect, 1.f, ContextHandle);
+	FGameplayEventData Payload;
+	Payload.Instigator = GetOwner();
+	Payload.Target = PlayerCharacter;
 
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, CCTags::SetByCaller::Projectile, Damage);
-
-	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+	UCC_BlueprintLibrary::SendDamageEventToPlayer(PlayerCharacter, DamageEffect, Payload, CCTags::SetByCaller::Projectile, Damage);
 
 	SpawnImpactEffects();
 	Destroy();
